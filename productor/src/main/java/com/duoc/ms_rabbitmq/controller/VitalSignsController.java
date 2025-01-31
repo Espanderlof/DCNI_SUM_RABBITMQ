@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.duoc.ms_rabbitmq.dto.VitalSignsDTO;
+import com.duoc.ms_rabbitmq.dto.AlertResponseDTO;
 import com.duoc.ms_rabbitmq.service.VitalSignsService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +22,9 @@ public class VitalSignsController {
     private VitalSignsService vitalSignsService;
     
     @PostMapping
-    public ResponseEntity<String> receiveVitalSigns(@RequestBody VitalSignsDTO vitalSigns) {
-        log.info("Recibiendo signos vitales: {}", vitalSigns);
-        vitalSignsService.analyzeVitalSigns(vitalSigns);
-        return ResponseEntity.ok("Signos vitales procesados correctamente");
+    public ResponseEntity<AlertResponseDTO> receiveVitalSigns(@RequestBody VitalSignsDTO vitalSigns) {
+        log.info("Recibiendo signos vitales para paciente ID: {}", vitalSigns.getPatientId());
+        AlertResponseDTO response = vitalSignsService.analyzeVitalSigns(vitalSigns);
+        return ResponseEntity.ok(response);
     }
 }

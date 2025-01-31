@@ -2,7 +2,8 @@ package com.duoc.ms_rabbitmq.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.duoc.ms_rabbitmq.dto.VitalSignsDTO;
+import com.duoc.ms_rabbitmq.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -12,52 +13,55 @@ public class VitalSignsService {
     @Autowired
     private RabbitMQProducer rabbitMQProducer;
     
-    public void analyzeVitalSigns(VitalSignsDTO vitalSigns) {
-        StringBuilder alertMessage = new StringBuilder();
+    @Autowired
+    private ObjectMapper objectMapper;
+    
+    public AlertResponseDTO analyzeVitalSigns(VitalSignsDTO vitalSigns) {
         boolean hasAnomaly = false;
         
-        // Verificar frecuencia cardíaca (60-100 bpm)
+        // Verificar frecuencia cardíaca
         if (!isHeartRateNormal(vitalSigns.getHeartRate())) {
-            String severity = getAlertSeverity(vitalSigns.getHeartRate(), 60.0, 100.0);
-            alertMessage.append("Frecuencia cardíaca ").append(severity)
-                       .append(": ").append(vitalSigns.getHeartRate()).append(" bpm. ");
             hasAnomaly = true;
         }
         
-        // Verificar presión arterial (sistólica: 90-140, diastólica: 60-90)
+        // Verificar presión arterial
         if (!isBloodPressureNormal(vitalSigns.getBloodPressureSystolic(), 
                                  vitalSigns.getBloodPressureDiastolic())) {
-            alertMessage.append("Presión arterial anormal: ")
-                       .append(vitalSigns.getBloodPressureSystolic()).append("/")
-                       .append(vitalSigns.getBloodPressureDiastolic()).append(" mmHg. ");
             hasAnomaly = true;
         }
         
-        // Verificar temperatura (36.5-37.5°C)
+        // Verificar temperatura
         if (!isTemperatureNormal(vitalSigns.getBodyTemperature())) {
-            String severity = getAlertSeverity(vitalSigns.getBodyTemperature(), 36.5, 37.5);
-            alertMessage.append("Temperatura corporal ").append(severity)
-                       .append(": ").append(vitalSigns.getBodyTemperature()).append("°C. ");
             hasAnomaly = true;
         }
         
-        // Verificar saturación de oxígeno (>95%)
+        // Verificar saturación de oxígeno
         if (!isOxygenSaturationNormal(vitalSigns.getOxygenSaturation())) {
-            alertMessage.append("Saturación de oxígeno BAJA: ")
-                       .append(vitalSigns.getOxygenSaturation()).append("%. ");
             hasAnomaly = true;
         }
         
-        // Si se detecta alguna anomalía, enviar alerta a RabbitMQ
+        // Si hay anomalías, enviar datos a RabbitMQ
         if (hasAnomaly) {
-            String alertHeader = String.format("ALERTA - Paciente ID: %d - %s - ", 
-                vitalSigns.getPatientId(),
-                vitalSigns.getTimestamp());
-            log.info("Anomalía detectada en signos vitales para paciente {}", vitalSigns.getPatientId());
-            rabbitMQProducer.sendAlertMessage(alertHeader + alertMessage.toString());
+            try {
+                String jsonMessage = objectMapper.writeValueAsString(vitalSigns);
+                log.info("Anomalía detectada en signos vitales para paciente {}", vitalSigns.getPatientId());
+                rabbitMQProducer.sendAlertMessage(jsonMessage);
+            } catch (Exception e) {
+                log.error("Error al convertir mensaje a JSON: {}", e.getMessage());
+            }
         } else {
             log.info("Signos vitales normales para paciente {}", vitalSigns.getPatientId());
         }
+        
+        // Construir respuesta simplificada
+        return AlertResponseDTO.builder()
+            .patientId(vitalSigns.getPatientId())
+            .timestamp(vitalSigns.getTimestamp())
+            .alertsGenerated(hasAnomaly)
+            .message(hasAnomaly ? 
+                "Se detectaron anomalías en los signos vitales y se generaron alertas" : 
+                "Todos los signos vitales están dentro de los rangos normales")
+            .build();
     }
     
     private boolean isHeartRateNormal(Double heartRate) {
@@ -76,11 +80,5 @@ public class VitalSignsService {
     
     private boolean isOxygenSaturationNormal(Double saturation) {
         return saturation != null && saturation > 95;
-    }
-    
-    private String getAlertSeverity(Double value, Double min, Double max) {
-        if (value < min) return "BAJA";
-        if (value > max) return "ALTA";
-        return "NORMAL";
     }
 }
