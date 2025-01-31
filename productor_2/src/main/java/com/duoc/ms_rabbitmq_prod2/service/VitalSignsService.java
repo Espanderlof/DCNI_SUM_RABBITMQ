@@ -29,7 +29,7 @@ public class VitalSignsService {
             vitalSign.getPatientId(), vitalSignsBuffer.size());
     }
 
-    @Scheduled(fixedRate = 100000) // 5 minutos = 300000 ms
+    @Scheduled(fixedRate = 300000) // 5 minutos = 300000 ms
     public void processAndSendVitalSigns() {
         if (vitalSignsBuffer.isEmpty()) {
             logger.info("No hay registros para enviar en este momento");
