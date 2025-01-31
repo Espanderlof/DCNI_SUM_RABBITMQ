@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  amed_productor1:
+    build:
+      context: ./productor_1
+      dockerfile: Dockerfile
+    container_name: amed_productor1
+    ports:
+      - "8082:8082"
+    networks:
+      - amed
+    restart: unless-stopped
+
+  amed_productor2:
+    build:
+      context: ./productor_2
+      dockerfile: Dockerfile
+    container_name: amed_productor2
+    ports:
+      - "8084:8084"
+    networks:
+      - amed
+    restart: unless-stopped
+
+  amed_consumidor1:
+    build:
+      context: ./consumidor_1
+      dockerfile: Dockerfile
+    container_name: amed_consumidor1
+    ports:
+      - "8083:8083"
+    networks:
+      - amed
+    restart: unless-stopped
+
+  amed_consumidor2:
+    build:
+      context: ./consumidor_2
+      dockerfile: Dockerfile
+    container_name: amed_consumidor2
+    ports:
+      - "8085:8085"
+    networks:
+      - amed
+    restart: unless-stopped
+
+networks:
+  amed:
+    name: amed
+    driver: bridge
