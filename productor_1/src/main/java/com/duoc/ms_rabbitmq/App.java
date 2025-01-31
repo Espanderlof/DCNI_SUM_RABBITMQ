@@ -13,7 +13,7 @@ public class App {
     
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
-        logger.info("Microservicio Productor RabbitMQ iniciado correctamente...");
-        logger.info("Listo para recibir y publicar mensajes en RabbitMQ...");
+        logger.info("Microservicio Productor 1 RabbitMQ iniciado correctamente...");
+        logger.info("Listo para recibir y publicar mensajes en RabbitMQ Productor 1...");
     }
 }

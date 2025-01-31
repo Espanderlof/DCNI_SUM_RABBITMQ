@@ -8,10 +8,10 @@
         <version>3.3.7</version>
     </parent>
     <groupId>com.duoc</groupId>
-    <artifactId>ms_rabbitmq_productor</artifactId>
+    <artifactId>ms_rabbitmq_productor1</artifactId>
     <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ms_rabbitmq_productor</name>
+    <name>ms_rabbitmq_productor1</name>
     <url>maven.apache.org</url>
     <properties>
         <java.version>17</java.version>
