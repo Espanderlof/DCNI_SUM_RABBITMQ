@@ -2,8 +2,8 @@ package com.duoc.ms_rabbitmq.service;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.duoc.ms_rabbitmq.config.RabbitMQConstants;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,14 +13,21 @@ public class RabbitMQProducer {
     @Autowired
     private RabbitTemplate rabbitTemplate;
     
-    @Value("${rabbitmq.exchange.name}")
-    private String exchange;
+    public void sendAlertMessage(String message) {
+        rabbitTemplate.convertAndSend(
+            RabbitMQConstants.EXCHANGE_NAME, 
+            RabbitMQConstants.ROUTING_KEY_ALERTAS, 
+            message
+        );
+        log.info("Alerta enviada: {}", message);
+    }
     
-    @Value("${rabbitmq.routing.key}")
-    private String routingKey;
-    
-    public void sendMessage(String message) {
-        rabbitTemplate.convertAndSend(exchange, routingKey, message);
-        log.info("Mensaje enviado: {}", message);
+    public void sendResumenMessage(String message) {
+        rabbitTemplate.convertAndSend(
+            RabbitMQConstants.EXCHANGE_NAME, 
+            RabbitMQConstants.ROUTING_KEY_RESUMEN, 
+            message
+        );
+        log.info("Resumen enviado: {}", message);
     }
 }
