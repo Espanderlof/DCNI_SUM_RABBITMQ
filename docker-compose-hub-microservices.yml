@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  amed_productor1:
+    image: espanderlof/dcni_sum_rabbitmq_productor1
+    container_name: amed_productor1
+    ports:
+      - "8082:8082"
+    networks:
+      - amed
+    restart: unless-stopped
+
+  amed_productor2:
+    image: espanderlof/dcni_sum_rabbitmq_productor2
+    container_name: amed_productor2
+    ports:
+      - "8084:8084"
+    networks:
+      - amed
+    restart: unless-stopped
+
+  amed_consumidor1:
+    image: espanderlof/dcni_sum_rabbitmq_consumidor1
+    container_name: amed_consumidor1
+    ports:
+      - "8083:8083"
+    networks:
+      - amed
+    restart: unless-stopped
+
+  amed_consumidor2:
+    image: espanderlof/dcni_sum_rabbitmq_consumidor2
+    container_name: amed_consumidor2
+    ports:
+      - "8085:8085"
+    networks:
+      - amed
+    restart: unless-stopped
+
+networks:
+  amed:
+    name: amed
+    driver: bridge
