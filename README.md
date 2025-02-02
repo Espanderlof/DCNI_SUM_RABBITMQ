@@ -53,6 +53,9 @@ sudo docker start amed_productor2
 sudo docker start amed_consumidor1
 sudo docker start amed_consumidor2
 
+sudo docker start alertas_medicas_backend rabbitmq
+sudo docker start amed_productor1 amed_productor2
+sudo docker start amed_consumidor1 amed_consumidor2
 
 # ver log tiempo real contenedor
 
